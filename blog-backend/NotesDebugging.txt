@@ -1,0 +1,10 @@
+First, I have to get the full-stack MERN application working in localhost
+Then, next step is getting it working heroku
+
+First have node/express backend server deployed on heroku
+
+Then, you have to go into the frontend portion of the directory and then update all references to localhost to the heroku domain
+
+Then you have to go to heroku and make sure all the env config vars are set appropriately
+
+Once you get error on backend heroku deployment site about Cannot GET/ (routing error), then that means heroku backend server is deployed properly
