@@ -48,36 +48,25 @@ function Home() {
     ));
   };
 
-  // Handle like
-  const handleLike = async (id) => {
-    const token = localStorage.getItem('token');
-    try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/posts/${id}/like`, {}, {
-        headers: { 'x-auth-token': token }
-      });
-      // Refresh posts to get updated likes
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/posts`);
-      const postsWithLikes = response.data.map(post => ({
-        ...post,
-        likes: post.likes || []
-      }));
-      setPosts(postsWithLikes);
-      setFilteredPosts(postsWithLikes);
-    } catch (error) {
-      setError(error.response?.data?.message || 'Error liking post');
-    }
-  };
-
-
-    // Handle unlike
-    const handleUnlike = async (id) => {
+    // Handle like
+    const handleLike = async (id) => {
       const token = localStorage.getItem('token');
       try {
-        await axios.post(`${process.env.REACT_APP_API_URL}/posts/${id}/unlike`, {}, {
+        await axios.post(`${process.env.REACT_APP_API_URL}/posts/${id}/like`, {}, {
           headers: { 'x-auth-token': token }
         });
+        // Refresh posts to get updated likes
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/posts`);
+        /*const postsWithLikes = response.data.map(post => ({
+          ...post,
+          likes: post.likes || []
+        }));*/
+        //setPosts(postsWithLikes);
+        //setFilteredPosts(postsWithLikes);
+        setPosts(response.data);
+        setFilteredPosts(response.data);
       } catch (error) {
-        console.error('Error unliking post', error);
+        setError(error.response?.data?.message || 'Error liking post');
       }
     };
 
@@ -159,13 +148,6 @@ function Home() {
                       <Card.Text>
                         {post.content.substring(0, 150)}...
                       </Card.Text>
-                      <Button
-                        variant="danger"
-                        onClick={() => handleLike(post._id)}
-                        className="me-2"
-                      >
-                        ❤️ {post.likes ? post.likes.length : 0}
-                      </Button>
                       <div className="d-flex justify-content-between align-items-center">
                         <Link to={`/post/${post._id}`}>
                           <Button variant="info" className="me-2">Read More</Button>
