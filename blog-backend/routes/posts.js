@@ -193,4 +193,38 @@ router.post('/:id/unlike', auth, async (req, res) => {
   }
 });
 
+// Add a comment to a post
+router.post('/:id/comments', auth, async (req, res) => {
+  try {
+    const { content } = req.body;
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    const comment = {
+      user: req.user.id,
+      content: content
+    };
+
+    post.comments.push(comment);
+    await post.save();
+    res.status(201).json({ message: 'Comment added successfully', comments: post.comments });
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding comment', error });
+  }
+});
+
+
+
+// Get comments for a post
+router.get('/:id/comments', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id).populate('comments.user', 'username');
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    res.status(200).json(post.comments);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching comments', error });
+  }
+});
+
 module.exports = router;
