@@ -33,7 +33,8 @@ router.post('/', auth, async (req, res) => {
     const newPost = new Post({
       title,
       content,
-      user: req.user.id // Include the user ID
+      user: req.user.id, // Include the user ID
+      likes: []
     });
 
     // Save the post to the database
@@ -47,12 +48,18 @@ router.post('/', auth, async (req, res) => {
 // Fetch posts
 router.get('/posts', async (req, res) => {
   try {
-    const posts = await Post.find().populate('user', 'username'); // Ensure `user` field is populated
-    res.json(posts);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const posts = await Post.find().populate('user', 'username').populate('likes', 'username');
+    // Ensure likes field is an array
+    const formattedPosts = posts.map(post => ({
+      ...post.toObject(),
+      likes: post.likes || [] // Ensure likes is always an array
+    }));
+    res.json(formattedPosts);
+  } catch (error) {
+    res.status(500).json({ message: error });
   }
 });
+
 
 // Update a post
 router.put('/:id', auth, async (req, res) => {
@@ -128,19 +135,62 @@ router.post('/:id/like', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error liking post', error });
   }
-});
+});*/
 
 // Route to get the number of likes
 router.get('/:id/likes', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id).populate('likes');
     if (!post) return res.status(404).json({ message: 'Post not found' });
-
-    res.status(200).json({ likes: post.likes.length });
+    if (post.likes != undefined) {
+      const post_instance = await Post.findById(req.params.id)
+      post_instance.likes.push([]);
+      await post_instance.save();
+    }
+    res.status(200).json({ likes: post.likes != undefined ? post.likes.length : 0 });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching likes', error });
   }
-});*/
+});
 
+
+// Like a post
+router.post('/:id/like', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    const userId = req.user.id; // Get user ID from auth middleware
+    if (post.likes.includes(userId)) {
+      return res.status(400).json({ message: 'Post already liked' });
+    }
+
+    post.likes.push(userId);
+    await post.save();
+    res.status(200).json({ message: 'Post liked successfully', likes: post.likes.length });
+  } catch (error) {
+    res.status(500).json({ message: 'Error liking post', error });
+  }
+});
+
+// Unlike a post
+router.post('/:id/unlike', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: 'Post not found' });
+
+    const userId = req.user.id; // Get user ID from auth middleware
+    const likeIndex = post.likes.indexOf(userId);
+    if (likeIndex === -1) {
+      return res.status(400).json({ message: 'Post not yet liked' });
+    }
+
+    post.likes.splice(likeIndex, 1);
+    await post.save();
+    res.status(200).json({ message: 'Post unliked successfully', likes: post.likes.length });
+  } catch (error) {
+    res.status(500).json({ message: 'Error unliking post', error });
+  }
+});
 
 module.exports = router;
