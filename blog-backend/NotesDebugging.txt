@@ -8,3 +8,23 @@ Then, you have to go into the frontend portion of the directory and then update 
 Then you have to go to heroku and make sure all the env config vars are set appropriately
 
 Once you get error on backend heroku deployment site about Cannot GET/ (routing error), then that means heroku backend server is deployed properly
+
+https://medium.com/@ryanmambou/deploying-a-mern-app-on-heroku-f6a9f0b76c9d
+i) git init
+
+ii) git add .
+
+iii)git commit -m ‘first commit’
+
+Note that you need to have git installed to do this. If not you’ll need to install it.
+
+4. Enter the command
+
+heroku create
+
+5. Add node_modules to a .gitignore file at the root of your folder as follows:
+
+
+6. Enter the command:
+
+git push heroku master
